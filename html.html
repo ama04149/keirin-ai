@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>競輪データ閲覧</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        h1, h2 { color: #333; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 2em; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .container { max-width: 1200px; margin: auto; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>競輪データ閲覧ページ</h1>
+        <p>最終更新: <span id="last-updated"></span></p>
+
+        <h2>レース集計結果 (keirin_race_summary.csv)</h2>
+        <div id="summary-table"></div>
+
+        <h2>元データ (keirin_prediction_result.csv)</h2>
+        <div id="prediction-table"></div>
+    </div>
+
+    <script>
+        // --- 設定項目 ---
+        const GITHUB_USERNAME = 'YOUR_USERNAME'; // あなたのGitHubユーザー名
+        const GITHUB_REPO_NAME = 'YOUR_REPO_NAME'; // あなたのリポジトリ名
+        // ----------------
+
+        const summaryCsvUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO_NAME}/main/keirin_race_summary.csv`;
+        const predictionCsvUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO_NAME}/main/keirin_prediction_result.csv`;
+
+        // 最終更新日時を表示
+        document.getElementById('last-updated').textContent = new Date().toLocaleString('ja-JP');
+
+        // CSVを読み込んでHTMLテーブルを生成する関数
+        function createTableFromCsv(url, targetElementId) {
+            Papa.parse(url, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    const data = results.data;
+                    if (data.length === 0) {
+                        document.getElementById(targetElementId).innerHTML = '<p>データを読み込めませんでした。</p>';
+                        return;
+                    }
+                    
+                    let tableHtml = '<table><thead><tr>';
+                    results.meta.fields.forEach(header => {
+                        tableHtml += `<th>${header}</th>`;
+                    });
+                    tableHtml += '</tr></thead><tbody>';
+
+                    data.forEach(row => {
+                        tableHtml += '<tr>';
+                        results.meta.fields.forEach(header => {
+                            tableHtml += `<td>${row[header] || ''}</td>`;
+                        });
+                        tableHtml += '</tr>';
+                    });
+
+                    tableHtml += '</tbody></table>';
+                    document.getElementById(targetElementId).innerHTML = tableHtml;
+                },
+                error: function(err) {
+                    document.getElementById(targetElementId).innerHTML = `<p>エラー: ${err.message}</p>`;
+                }
+            });
+        }
+
+        // 各CSVファイルに対してテーブル生成を実行
+        createTableFromCsv(summaryCsvUrl, 'summary-table');
+        createTableFromCsv(predictionCsvUrl, 'prediction-table');
+    </script>
+</body>
+</html>
