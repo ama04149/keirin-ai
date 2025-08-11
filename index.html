@@ -22,7 +22,7 @@
         <h2>レース集計結果 (keirin_race_summary.csv)</h2>
         <div id="summary-table"></div>
 
-        <h2>元データ (keirin_prediction_result.csv)</h2>
+        <h2>元データ (keirin_prediction_result_combined.csv)</h2>
         <div id="prediction-table"></div>
     </div>
 
@@ -33,7 +33,7 @@
         // ----------------
 
         const summaryCsvUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO_NAME}/main/keirin_race_summary.csv`;
-        const predictionCsvUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO_NAME}/main/keirin_prediction_result.csv`;
+        const predictionCsvUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO_NAME}/main/keirin_prediction_result_combined.csv`;
 
         // 最終更新日時を表示
         document.getElementById('last-updated').textContent = new Date().toLocaleString('ja-JP');
