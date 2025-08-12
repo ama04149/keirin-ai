@@ -19,10 +19,10 @@
         <h1>競輪データ閲覧ページ</h1>
         <p>最終更新: <span id="last-updated"></span></p>
 
-        <h2>レース集計結果 (keirin_race_summary.csv)</h2>
+        <h2>レース集計結果 (keirin_race_summary2.csv)</h2>
         <div id="summary-table"></div>
 
-        <h2>元データ (keirin_prediction_result.csv)</h2>
+        <h2>元データ (keirin_race_summary.csv)</h2>
         <div id="prediction-table"></div>
     </div>
 
@@ -32,8 +32,8 @@
         const GITHUB_REPO_NAME = 'keirin-ai'; // あなたのリポジトリ名
         // ----------------
 
-        const summaryCsvUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO_NAME}/main/keirin_race_summary.csv`;
-        const predictionCsvUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO_NAME}/main/keirin_prediction_result.csv`;
+        const summaryCsvUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO_NAME}/main/keirin_race_summary2.csv`;
+        const predictionCsvUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO_NAME}/main/keirin_race_summary.csv`;
 
         // 最終更新日時を表示
         document.getElementById('last-updated').textContent = new Date().toLocaleString('ja-JP');
