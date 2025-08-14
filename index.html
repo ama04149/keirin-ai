@@ -19,6 +19,9 @@
         <h1>競輪データ閲覧ページ</h1>
         <p>最終更新: <span id="last-updated"></span></p>
 
+        <h2>レース集計結果２ (keirin_race_summary3.csv)</h2>
+        <div id="summary-table2"></div>
+        
         <h2>レース集計結果 (keirin_race_summary2.csv)</h2>
         <div id="summary-table"></div>
 
@@ -31,7 +34,7 @@
         const GITHUB_USERNAME = 'ama04149'; // あなたのGitHubユーザー名
         const GITHUB_REPO_NAME = 'keirin-ai'; // あなたのリポジトリ名
         // ----------------
-
+        const summaryCsvUrl2 = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO_NAME}/main/keirin_race_summary3.csv`;
         const summaryCsvUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO_NAME}/main/keirin_race_summary2.csv`;
         const predictionCsvUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO_NAME}/main/keirin_race_summary.csv`;
 
@@ -75,6 +78,7 @@
         }
 
         // 各CSVファイルに対してテーブル生成を実行
+        createTableFromCsv(summaryCsvUrl2, 'summary-table2');
         createTableFromCsv(summaryCsvUrl, 'summary-table');
         createTableFromCsv(predictionCsvUrl, 'prediction-table');
     </script>
