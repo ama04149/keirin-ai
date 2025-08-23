@@ -5,47 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>競輪データ閲覧</title>
     <style>
-        body {
-            font-family: sans-serif;
-            margin: 1em;
-            background-color: #f9f9f9;
-            color: #333;
-        }
-        h1, h2 {
-            color: #1a1a1a;
-            border-bottom: 2px solid #ccc;
-            padding-bottom: 0.3em;
-            font-size: 1.5em; /* フォントサイズを小さくして、狭い画面に合わせる */
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-bottom: 1em;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            table-layout: fixed; /* 列の幅を固定する */
-        }
-        th, td {
-            border: 1px solid #e0e0e0;
-            padding: 8px;
-            text-align: left;
-            word-wrap: break-word; /* セル内のテキストを折り返す */
-            overflow: hidden; /* はみ出したテキストを非表示にする */
-        }
-        th {
-            background-color: #e6e6e6;
-            font-weight: bold;
-            font-size: 0.8em; /* ヘッダーのフォントサイズをさらに小さくする */
-        }
-        td {
-            font-size: 0.8em;
-        }
-        .container {
-            max-width: 1200px;
-            margin: auto;
-            padding: 0.5em;
-            background-color: #fff;
-            border-radius: 8px;
-        }
+        body { font-family: sans-serif; margin: 2em; }
+        h1, h2 { color: #333; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 2em; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .container { max-width: 1200px; margin: auto; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 </head>
@@ -59,7 +24,7 @@
 
         <h2>レース集計結果２ (keirin_race_summary3.csv)</h2>
         <div id="summary-table2"></div>
-
+        
         <h2>レース集計結果１ (keirin_race_summary2.csv)</h2>
         <div id="summary-table"></div>
 
@@ -88,13 +53,11 @@
                 skipEmptyLines: true,
                 complete: function(results) {
                     const data = results.data;
-                    const tableContainer = document.getElementById(targetElementId);
-
                     if (data.length === 0) {
-                        tableContainer.innerHTML = '<p>データを読み込めませんでした。</p>';
+                        document.getElementById(targetElementId).innerHTML = '<p>データを読み込めませんでした。</p>';
                         return;
                     }
-
+                    
                     let tableHtml = '<table><thead><tr>';
                     results.meta.fields.forEach(header => {
                         tableHtml += `<th>${header}</th>`;
@@ -110,7 +73,7 @@
                     });
 
                     tableHtml += '</tbody></table>';
-                    tableContainer.innerHTML = tableHtml;
+                    document.getElementById(targetElementId).innerHTML = tableHtml;
                 },
                 error: function(err) {
                     document.getElementById(targetElementId).innerHTML = `<p>エラー: ${err.message}</p>`;
