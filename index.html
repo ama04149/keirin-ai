@@ -1,3 +1,10 @@
+画面の横幅に自動で合わせるには、CSSの@mediaクエリとoverflow-x: auto;を使用して、スマートフォンなどの小さな画面サイズに合わせてテーブルのスタイルを調整します。
+
+修正後のHTMLコード
+
+以下の修正を加えたHTMLコードを使用してください。
+HTML
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -11,6 +18,15 @@
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; }
         .container { max-width: 1200px; margin: auto; }
+        
+        /* スマートフォン対応のための修正 */
+        .table-responsive {
+            overflow-x: auto; /* テーブルが画面からはみ出る場合にスクロールバーを表示 */
+        }
+        @media (max-width: 600px) {
+            body { margin: 1em; } /* 小さな画面では余白を減らす */
+            h1, h2 { font-size: 1.5em; } /* フォントサイズを調整 */
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 </head>
@@ -20,16 +36,16 @@
         <p>最終更新: <span id="last-updated"></span></p>
 
         <h2>レース集計結果３ (keirin_race_summary4.csv)</h2>
-        <div id="summary-table3"></div>
+        <div class="table-responsive" id="summary-table3"></div>
 
         <h2>レース集計結果２ (keirin_race_summary3.csv)</h2>
-        <div id="summary-table2"></div>
+        <div class="table-responsive" id="summary-table2"></div>
         
         <h2>レース集計結果１ (keirin_race_summary2.csv)</h2>
-        <div id="summary-table"></div>
+        <div class="table-responsive" id="summary-table"></div>
 
         <h2>元データ (keirin_race_summary.csv)</h2>
-        <div id="prediction-table"></div>
+        <div class="table-responsive" id="prediction-table"></div>
     </div>
 
     <script>
