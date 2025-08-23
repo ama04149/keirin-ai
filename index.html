@@ -1,3 +1,10 @@
+承知いたしました。テーブルが横スクロールするのではなく、画面の横幅に合わせて自動的に収まるように修正します。これは、列の幅を動的に調整したり、セル内のテキストを折り返したりすることで実現できます。
+
+修正版HTMLコード
+
+以下の修正を加えたHTMLコードを使用してください。
+HTML
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -5,20 +12,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>競輪データ閲覧</title>
     <style>
-        body { font-family: sans-serif; margin: 2em; }
-        h1, h2 { color: #333; }
-        table { border-collapse: collapse; width: 100%; margin-bottom: 2em; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .container { max-width: 1200px; margin: auto; }
-        
-        /* スマートフォン対応のための修正 */
-        .table-responsive {
-            overflow-x: auto; /* テーブルが画面からはみ出る場合にスクロールバーを表示 */
+        body {
+            font-family: sans-serif;
+            margin: 1em;
+            background-color: #f9f9f9;
+            color: #333;
         }
-        @media (max-width: 600px) {
-            body { margin: 1em; } /* 小さな画面では余白を減らす */
-            h1, h2 { font-size: 1.5em; } /* フォントサイズを調整 */
+        h1, h2 {
+            color: #1a1a1a;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 0.3em;
+            font-size: 1.5em; /* フォントサイズを小さくして、狭い画面に合わせる */
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 1em;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            table-layout: fixed; /* 列の幅を固定する */
+        }
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 8px;
+            text-align: left;
+            word-wrap: break-word; /* セル内のテキストを折り返す */
+            overflow: hidden; /* はみ出したテキストを非表示にする */
+        }
+        th {
+            background-color: #e6e6e6;
+            font-weight: bold;
+            font-size: 0.8em; /* ヘッダーのフォントサイズをさらに小さくする */
+        }
+        td {
+            font-size: 0.8em;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 0.5em;
+            background-color: #fff;
+            border-radius: 8px;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
@@ -29,16 +62,16 @@
         <p>最終更新: <span id="last-updated"></span></p>
 
         <h2>レース集計結果３ (keirin_race_summary4.csv)</h2>
-        <div class="table-responsive" id="summary-table3"></div>
+        <div id="summary-table3"></div>
 
         <h2>レース集計結果２ (keirin_race_summary3.csv)</h2>
-        <div class="table-responsive" id="summary-table2"></div>
-        
+        <div id="summary-table2"></div>
+
         <h2>レース集計結果１ (keirin_race_summary2.csv)</h2>
-        <div class="table-responsive" id="summary-table"></div>
+        <div id="summary-table"></div>
 
         <h2>元データ (keirin_race_summary.csv)</h2>
-        <div class="table-responsive" id="prediction-table"></div>
+        <div id="prediction-table"></div>
     </div>
 
     <script>
@@ -62,11 +95,13 @@
                 skipEmptyLines: true,
                 complete: function(results) {
                     const data = results.data;
+                    const tableContainer = document.getElementById(targetElementId);
+
                     if (data.length === 0) {
-                        document.getElementById(targetElementId).innerHTML = '<p>データを読み込めませんでした。</p>';
+                        tableContainer.innerHTML = '<p>データを読み込めませんでした。</p>';
                         return;
                     }
-                    
+
                     let tableHtml = '<table><thead><tr>';
                     results.meta.fields.forEach(header => {
                         tableHtml += `<th>${header}</th>`;
@@ -82,7 +117,7 @@
                     });
 
                     tableHtml += '</tbody></table>';
-                    document.getElementById(targetElementId).innerHTML = tableHtml;
+                    tableContainer.innerHTML = tableHtml;
                 },
                 error: function(err) {
                     document.getElementById(targetElementId).innerHTML = `<p>エラー: ${err.message}</p>`;
