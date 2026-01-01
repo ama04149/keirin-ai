@@ -1,0 +1,7 @@
+.venv/
+.vscode/
+catboost_info/
+backup/
+*.pkl
+*.xlsx
+logs.log
