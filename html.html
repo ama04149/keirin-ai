@@ -3,51 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>競輪データ閲覧</title>
+    <title>競輪データ閲覧 (GitHub対応版)</title>
     <style>
-        body { font-family: sans-serif; margin: 2em; }
-        h1, h2 { color: #333; }
-        table { border-collapse: collapse; width: 100%; margin-bottom: 2em; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .container { max-width: 1200px; margin: auto; }
+        body { font-family: sans-serif; margin: 2em; background-color: #f9f9f9; color: #333; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        /* タブデザイン */
+        .tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 20px; gap: 5px; }
+        .tab-button { padding: 10px 20px; cursor: pointer; border: 1px solid transparent; background: #eee; border-radius: 5px 5px 0 0; font-weight: bold; transition: 0.3s; }
+        .tab-button:hover { background: #e0e0e0; }
+        .tab-button.active { background: white; border: 1px solid #ddd; border-bottom: 2px solid white; color: #007bff; margin-bottom: -2px; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* テーブル */
+        .table-wrapper { overflow-x: auto; margin-top: 10px; border: 1px solid #eee; }
+        table { border-collapse: collapse; width: 100%; font-size: 0.85em; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; white-space: nowrap; }
+        th { background-color: #f2f2f2; position: sticky; top: 0; z-index: 10; }
+        tr:nth-child(even) { background-color: #fafafa; }
+        tr:hover { background-color: #f1f1f1; }
+        
+        .loading { color: #888; font-style: italic; }
+        .error { color: #d9534f; font-weight: bold; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>競輪データ閲覧ページ</h1>
-        <p>最終更新: <span id="last-updated"></span></p>
+        <h1>競輪データ閲覧</h1>
+        <p>最終更新 (ブラウザ取得時): <span id="last-updated"></span></p>
 
-        <h2>レース集計結果 (keirin_race_summary.csv)</h2>
-        <div id="summary-table"></div>
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab(event, 'summary-tab')">集計結果</button>
+            <button class="tab-button" onclick="openTab(event, 'detail-tab')">選手詳細</button>
+            <button class="tab-button" onclick="openTab(event, 'raw-tab')">元データ</button>
+        </div>
 
-        <h2>元データ (keirin_prediction_result.csv)</h2>
-        <div id="prediction-table"></div>
+        <div id="summary-tab" class="tab-content active">
+            <h3>レース集計結果３ (summary4)</h3>
+            <div id="summary-table3" class="table-wrapper"><p class="loading">読み込み中...</p></div>
+            <h3>レース集計結果２ (summary3)</h3>
+            <div id="summary-table2" class="table-wrapper"><p class="loading">読み込み中...</p></div>
+            <h3>レース集計結果１ (summary2)</h3>
+            <div id="summary-table" class="table-wrapper"><p class="loading">読み込み中...</p></div>
+        </div>
+
+        <div id="detail-tab" class="tab-content">
+            <h3>選手詳細データ (combined)</h3>
+            <div id="detail-table" class="table-wrapper"><p class="loading">読み込み中...</p></div>
+        </div>
+
+        <div id="raw-tab" class="tab-content">
+            <h3>元データ (summary)</h3>
+            <div id="prediction-table" class="table-wrapper"><p class="loading">読み込み中...</p></div>
+        </div>
     </div>
 
     <script>
-        // --- 設定項目 ---
-        const GITHUB_USERNAME = 'ama04149'; // あなたのGitHubユーザー名
-        const GITHUB_REPO_NAME = 'keirin-ai'; // あなたのリポジトリ名
-        // ----------------
+        // GitHub Pagesで動かす場合、CSVがHTMLと同じリポジトリにあるなら相対パスが最も安全です
+        // キャッシュ回避のためクエリパラメータを付与します
+        const cacheBuster = `?t=${new Date().getTime()}`;
+        
+        const csvFiles = {
+            'summary-table3': 'keirin_race_summary4.csv' + cacheBuster,
+            'summary-table2': 'keirin_race_summary3.csv' + cacheBuster,
+            'summary-table':  'keirin_race_summary2.csv' + cacheBuster,
+            'detail-table':   'keirin_prediction_result_combined.csv' + cacheBuster,
+            'prediction-table': 'keirin_race_summary.csv' + cacheBuster
+        };
 
-        const summaryCsvUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO_NAME}/main/keirin_race_summary.csv`;
-        const predictionCsvUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO_NAME}/main/keirin_prediction_result.csv`;
-
-        // 最終更新日時を表示
         document.getElementById('last-updated').textContent = new Date().toLocaleString('ja-JP');
 
-        // CSVを読み込んでHTMLテーブルを生成する関数
+        function openTab(evt, tabName) {
+            const contents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < contents.length; i++) contents[i].classList.remove("active");
+            const buttons = document.getElementsByClassName("tab-button");
+            for (let i = 0; i < buttons.length; i++) buttons[i].classList.remove("active");
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
         function createTableFromCsv(url, targetElementId) {
             Papa.parse(url, {
                 download: true,
                 header: true,
                 skipEmptyLines: true,
                 complete: function(results) {
-                    const data = results.data;
-                    if (data.length === 0) {
-                        document.getElementById(targetElementId).innerHTML = '<p>データを読み込めませんでした。</p>';
+                    const targetEl = document.getElementById(targetElementId);
+                    if (results.data.length === 0) {
+                        targetEl.innerHTML = '<p class="error">データが空です。</p>';
                         return;
                     }
                     
@@ -57,26 +103,26 @@
                     });
                     tableHtml += '</tr></thead><tbody>';
 
-                    data.forEach(row => {
+                    results.data.forEach(row => {
                         tableHtml += '<tr>';
                         results.meta.fields.forEach(header => {
                             tableHtml += `<td>${row[header] || ''}</td>`;
                         });
                         tableHtml += '</tr>';
                     });
-
                     tableHtml += '</tbody></table>';
-                    document.getElementById(targetElementId).innerHTML = tableHtml;
+                    targetEl.innerHTML = tableHtml;
                 },
-                error: function(err) {
-                    document.getElementById(targetElementId).innerHTML = `<p>エラー: ${err.message}</p>`;
+                error: function() {
+                    document.getElementById(targetElementId).innerHTML = `<p class="error">ファイルの取得に失敗しました。ファイル名を確認してください。</p>`;
                 }
             });
         }
 
-        // 各CSVファイルに対してテーブル生成を実行
-        createTableFromCsv(summaryCsvUrl, 'summary-table');
-        createTableFromCsv(predictionCsvUrl, 'prediction-table');
+        // 初期読み込み
+        Object.keys(csvFiles).forEach(id => {
+            createTableFromCsv(csvFiles[id], id);
+        });
     </script>
 </body>
 </html>
