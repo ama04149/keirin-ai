@@ -16,4 +16,5 @@ python "C:\Users\wolfs\Desktop\keirin-ai\src\analyze_prediction.py"
 
 echo "すべての処理が完了しました。"
 
+REM pause
 pause

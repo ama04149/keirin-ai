@@ -378,6 +378,6 @@ if __name__ == '__main__':
     print("\n--- GitHubへのアップロードを開始します ---")
     today_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
     commit_msg = f"Data update: {today_str}"
-    files_to_upload = [OUTPUT_CSV, output_filename2, output_filename3, output_filename4, "index.html"] 
+    files_to_upload = [INPUT_CSV,OUTPUT_CSV, output_filename2, output_filename3, output_filename4, "index.html"] 
     
     upload_to_github(files_to_upload, commit_msg, REPO_PATH)
