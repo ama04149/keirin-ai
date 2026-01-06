@@ -29,7 +29,7 @@ df.columns = df.columns.str.replace(' ', '_').str.replace('　', '_')
 categorical_features = ['予_想', '枠_番', '車_番', '級_班', '脚_質', '期別', '競輪場', 'グレード', '天気', 'レース番号','レースタイトル', '開催番号', '強度', '強度２', '強度３', 'ライン構成', '1周']
 
 # カテゴリ変数と、手動で処理/削除する列を定義
-exclude_from_numeric_conversion = categorical_features + ['index', '予_想', '総_評', '選手名', 'レース名', '開催日', '開始時間']# 'レースタイトル', 
+exclude_from_numeric_conversion = categorical_features + ['index', '総_評', '選手名', 'レース名', '開催日', '開始時間']# 'レースタイトル', '予_想', 
 
 # 【修正箇所④】除外リスト以外の全ての列を一括で数値化 ('着_順'もここで処理される)
 for col in df.columns:
@@ -47,7 +47,7 @@ df['target'] = df['target'].astype(int)
 
 # 【修正箇所④】学習に不要な列を最後にまとめて削除
 columns_to_drop = [
-    'index' ,'総_評', '選手名', '着_順', 
+    'index' , '総_評', '選手名', '着_順', 
     'レース名', '開催日'
     # ★★★ ここから下の特徴量を追加で削除 ★★★
     # 'レースタイトル', '予_想', '得点順位', '競走得点_sa', 'B_sa', 'B_sa2', 'B_suu', '逃_sa', 
