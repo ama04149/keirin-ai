@@ -22,7 +22,7 @@ new_data.columns = new_data.columns.str.strip()
 new_data.columns = new_data.columns.str.replace(' ', '_').str.replace('　', '_')
 
 # 2. カテゴリとして扱う列を定義 (学習時と完全に一致させる)
-categorical_features = ['枠_番', '車_番', '級_班', '脚_質', '期別', '競輪場', 'グレード', '天気', 'レース番号', 'レースタイトル', '開催番号', '強度', '強度２', '強度３', 'ライン構成', '1周']
+categorical_features = ['予想','枠_番', '車_番', '級_班', '脚_質', '期別', '競輪場', 'グレード', '天気', 'レース番号', 'レースタイトル', '開催番号', '強度', '強度２', '強度３', 'ライン構成', '1周']
 
 # 3. 数値変換から除外する列を定義
 exclude_from_numeric_conversion = categorical_features + ['予_想', '総_評', '選手名', 'レース名', '開催日', '開始時間'] 
