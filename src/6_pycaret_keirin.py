@@ -26,10 +26,10 @@ df.columns = df.columns.str.replace(' ', '_').str.replace('　', '_')
 
 # 【修正箇所②】数値変換処理をここに集約
 # カテゴリとして扱う列を先に定義
-categorical_features = ['予_想', '枠_番', '車_番', '級_班', '脚_質', '期別', '競輪場', 'グレード', '天気', 'レース番号','レースタイトル', '開催番号', '強度', '強度２', '強度３', 'ライン構成', '1周']
+categorical_features = ['枠_番', '車_番', '級_班', '脚_質', '期別', '競輪場', 'グレード', '天気', 'レース番号','レースタイトル', '開催番号', '強度', '強度２', '強度３', 'ライン構成', '1周'] # '予_想', 
 
 # カテゴリ変数と、手動で処理/削除する列を定義
-exclude_from_numeric_conversion = categorical_features + ['index', '総_評', '選手名', 'レース名', '開催日', '開始時間']
+exclude_from_numeric_conversion = categorical_features + ['index', '総_評', 'レース名', '開催日', '開始時間', '予_想'] # '選手名', 
 
 # 【修正箇所④】除外リスト以外の全ての列を一括で数値化 ('着_順'もここで処理される)
 for col in df.columns:
@@ -47,9 +47,9 @@ df['target'] = 1 - df['target']
 
 # 【修正箇所④】学習に不要な列を最後にまとめて削除
 columns_to_drop = [
-    'index' ,'総_評', '選手名', '着_順', 
+    'index' , '予_想', '総_評', '着_順', 
     'レース名', '開催日'
-] #'レースタイトル', '予_想'
+] #'レースタイトル','選手名', 2026/01/01修正
 df = df.drop(columns=columns_to_drop, errors='ignore')
 
 # --- 3. PyCaretのセットアップ ---
