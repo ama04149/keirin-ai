@@ -14,7 +14,10 @@ python "C:\Users\wolfs\Desktop\keirin-ai\src\t_race.py"
 echo "keirin_prediction_result.csv を処理するスクリプトを実行します..."
 python "C:\Users\wolfs\Desktop\keirin-ai\src\analyze_prediction.py"
 
+echo "EVランキングを作成します..."
+python "C:\Users\wolfs\Desktop\keirin-ai\src\ev_ranker.py"
+
 echo "すべての処理が完了しました。"
 
 REM pause
-pause
+REM pause

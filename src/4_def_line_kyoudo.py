@@ -89,11 +89,11 @@ def line_kyoudo(race_card):
 
 # main関数
 if __name__ == '__main__':
-    r_syu= pd.read_pickle('race_card2_202511-202512.pkl')
+    r_syu= pd.read_pickle('race_card2_202601-202601.pkl')
     r_syu_s = line_kyoudo(r_syu)
     #r_syu2= pd.read_pickle('race_card2_20250712.pkl')
     #r_syu_s2 = line_kyoudo(r_syu2)
 
 
-    pd.to_pickle(r_syu_s,'race_card3_202511-202512.pkl')
+    pd.to_pickle(r_syu_s,'race_card3_202601-202601.pkl')
     #pd.to_pickle(r_syu_s2,'today_race_card3.pkl')

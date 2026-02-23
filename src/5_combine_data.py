@@ -3,9 +3,9 @@ import pandas as pd
 # 結合するファイル名のリスト
 # ('既存ファイル', '追加ファイル', '結合後のファイル名')
 files_to_combine = [
-    ('race_info2_202106-202509.pkl', 'race_info2_202511-202512.pkl', 'race_info2_202106-202512.pkl'),
-    ('race_card3_202106-202509.pkl', 'race_card3_202511-202512.pkl', 'race_card3_202106-202512.pkl'),
-    ('race_return_202106-202509.pkl', 'race_return_202511-202512.pkl', 'race_return_202106-202512.pkl')
+    ('race_info2_202106-202512.pkl', 'race_info2_202601-202601.pkl', 'race_info2_202106-202601.pkl'),
+    ('race_card3_202106-202512.pkl', 'race_card3_202601-202601.pkl', 'race_card3_202106-202601.pkl'),
+    ('race_return_202106-202512.pkl', 'race_return_202601-202601.pkl', 'race_return_202106-202601.pkl')
 ]
 
 for existing_file, past_file, output_file in files_to_combine:

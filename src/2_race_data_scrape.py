@@ -199,9 +199,8 @@ def race_data_scrape(race_ids):
                 # エラーの原因箇所を修正
                 race_start_time = '不明'
                 time_dl = soup.find('dl', attrs={'class': "time"})
-                if time_dl:
-                    dd_elements = time_dl.find_all('dd')
-                if dd_elements:
+                dd_elements = time_dl.find_all('dd') if time_dl else []
+                if len(dd_elements) > 0:
                     race_start_time = dd_elements[0].text
 
                 # エラーの原因箇所を修正
@@ -222,9 +221,16 @@ def race_data_scrape(race_ids):
                                 '開始時間': race_start_time, '天気': race_condition_weather, '風速': race_condition_wind,
                                 'レース番号': race_info_header[0], '開催日': race_info_day, '開催番号': race_info_header[3], '車立': len(pd_racecard),
                                 'ライン数': len(line_k), 'ライン構成': kousei2}
-            
+
+                # ★ここが最重要：race_cardに race_id 列を付ける
+                pd_racecard2["race_id"] = str(id_a)
+
+                # （任意）indexにも残すならOK            
                 pd_racecard2.index = [id_a] * len(pd_racecard2)
                 entry_table[id_a] = pd_racecard2
+
+                # ★払戻も後で使うなら列を付ける（強く推奨）
+                pd_harai["race_id"] = str(id_a)
             
                 pd_harai.index = [id_a] * len(pd_harai)
                 return_table[id_a] = pd_harai
@@ -251,8 +257,8 @@ def race_data_scrape(race_ids):
 # main関数
 if __name__ == '__main__':
     #race_ids = pd.read_pickle('race_id_202106-202206.pkl')
-    race_ids = pd.read_pickle('race_id_202511-202512.pkl')
+    race_ids = pd.read_pickle('race_id_202601-202601.pkl')
     race_data = race_data_scrape(race_ids)
-    pd.to_pickle(race_data[0],'race_info_202511-202512.pkl')
-    pd.to_pickle(race_data[1],'race_card_202511-202512.pkl')
-    pd.to_pickle(race_data[2].iloc[:,:11],'race_return_202511-202512.pkl')
+    pd.to_pickle(race_data[0],'race_info_202601-202601.pkl')
+    pd.to_pickle(race_data[1],'race_card_202601-202601.pkl')
+    pd.to_pickle(race_data[2].iloc[:,:11],'race_return_202601-202601.pkl')

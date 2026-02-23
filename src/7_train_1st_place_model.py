@@ -6,10 +6,17 @@ from sklearn.metrics import roc_auc_score
 from pycaret.classification import plot_model
 import matplotlib.pyplot as plt
 import japanize_matplotlib
+import sys
+import io
+
+# 出力をUTF-8に強制（Windows環境で有効な場合が多い）
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 # --- 1. データの読み込みと結合 ---
-df_shussou = pd.read_pickle('race_card3_202106-202512.pkl')
-df_raceinfo = pd.read_pickle('race_info2_202106-202512.pkl')
+# df_shussou = pd.read_pickle('race_card3_202106-202512.pkl')
+df_shussou = pd.read_pickle('race_card3_cumulative_ready.pkl')
+df_raceinfo = pd.read_pickle('race_info2_202106-202601.pkl')
 
 df_shussou.reset_index(inplace=True)
 df_raceinfo.reset_index(inplace=True)
@@ -21,26 +28,33 @@ print(f"データ結合後のShape: {df.shape}")
 # --- 2. データの前処理と特徴量生成 ---
 
 # 【修正箇所①】列名のクリーニングを最初に行う
-df.columns = df.columns.str.strip()
-df.columns = df.columns.str.replace(' ', '_').str.replace('　', '_')
+df.columns = df.columns.str.strip().str.replace(' ', '_').str.replace('　', '_')
 
-# 【修正箇所②】数値変換処理をここに集約
 # カテゴリとして扱う列を先に定義
 categorical_features = ['枠_番', '車_番', '級_班', '脚_質', '期別', '競輪場', 'グレード', '天気', 'レース番号','レースタイトル', '開催番号', '強度', '強度２', '強度３', 'ライン構成', '1周'] #'予_想', 
 
 # カテゴリ変数と、手動で処理/削除する列を定義
-exclude_from_numeric_conversion = categorical_features + ['index', '総_評', 'レース名', '開催日', '開始時間', '予_想']# 'レースタイトル','選手名', 
+exclude_from_numeric_conversion = categorical_features + ['index', '総_評', 'レース名', '開催日', '開始時間', '予_想', '選手名']# 'レースタイトル',
 
 # 【修正箇所④】除外リスト以外の全ての列を一括で数値化 ('着_順'もここで処理される)
 for col in df.columns:
     if col not in exclude_from_numeric_conversion:
         df[col] = pd.to_numeric(df[col], errors='coerce')
 
+# 【修正】2. 数値変換が終わった後に、一括で欠損値を埋める（最強の処理）
+numeric_cols = df.select_dtypes(include=['number']).columns
+df[numeric_cols] = df[numeric_cols].fillna(0)
+
+object_cols = df.select_dtypes(include=['object']).columns
+df[object_cols] = df[object_cols].fillna('unknown')
+
+
+# 【重要】新しく追加された累積列を定義（数値変換の対象に含める）
+cumulative_features = ['累計勝率', '累計2連対率', '累計3連対率', '累計出走数']
+
 # 【修正箇所③】目的変数(target)の作成
-df['着_順'].fillna(99, inplace=True)
-df['着_順'] = df['着_順'].astype(int)
-df['target'] = df['着_順'].apply(lambda x: 1 if x == 1 else 0)
-df['target'] = df['target'].astype(int)
+df['着_順'] = pd.to_numeric(df['着_順'], errors='coerce').fillna(99)
+df['target'] = df['着_順'].apply(lambda x: 1 if x == 1 else 0).astype(int)
 
 # 【変更点②】(重要) スコアが逆転しないため、targetの反転処理は削除
 #df['target'] = 1 - df['target'] # ← この行を削除またはコメントアウト
@@ -48,12 +62,15 @@ df['target'] = df['target'].astype(int)
 # 【修正箇所④】学習に不要な列を最後にまとめて削除
 columns_to_drop = [
     'index' , '予_想', '総_評', '着_順', 
-    'レース名', '開催日'
-    # ★★★ ここから下の特徴量を追加で削除 ★★★ 2026/01/01予想を除外
+    'レース名', '開催日', '選手名'
+    # ★★★ ここから下の特徴量を追加で削除 ★★★
     # 'レースタイトル', '予_想', '得点順位', '競走得点_sa', 'B_sa', 'B_sa2', 'B_suu', '逃_sa', 
-    #'逃_sa2', '逃_suu', '捲_sa', '差_sa', 'マ_sa', '選手名', 
+    #'逃_sa2', '逃_suu', '捲_sa', '差_sa', 'マ_sa',  
 ]
 df = df.drop(columns=columns_to_drop, errors='ignore')
+
+# 最終チェック（NaNが残っていないか）
+print(f"全データのNaN合計: {df.isnull().sum().sum()}")
 
 # --- 3. PyCaretのセットアップ ---
 
@@ -75,6 +92,7 @@ s = setup(data=data_train,
         session_id=123,
         n_jobs=4,
         categorical_features=categorical_features,
+        numeric_features=cumulative_features,
         ignore_features=['開始時間'], # 時間データは今回は無視
         fix_imbalance=True, # 1着予測は不均衡データなのでTrueを推奨
         feature_selection=True,

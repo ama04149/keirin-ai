@@ -143,8 +143,8 @@ if __name__ == '__main__':
     # 【変更点】ループの開始を1にすることで、今月を除外し先月から開始する
     # 1:先月, 2:2ヶ月前, 3:3ヶ月前, 4:4ヶ月前
     #for i in range(39, 51):
-    #for i in range(1,2): #1か月分だけはこっち
-    for i in range(1,4): #1か月分だけはこっち
+    for i in range(1,2): #1か月分だけはこっち
+    #for i in range(1,4): #1か月分だけはこっち
         # 基準日から月を遡る計算
         target_date = today.replace(day=1)
         for _ in range(i):
