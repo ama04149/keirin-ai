@@ -42,12 +42,8 @@
         </div>
 
         <div id="summary-tab" class="tab-content active">
-            <h3>レース集計結果３ (summary4)</h3>
-            <div id="summary-table3" class="table-wrapper"><p class="loading">読み込み中...</p></div>
-            <h3>レース集計結果２ (summary3)</h3>
-            <div id="summary-table2" class="table-wrapper"><p class="loading">読み込み中...</p></div>
-            <h3>レース集計結果１ (summary2)</h3>
-            <div id="summary-table" class="table-wrapper"><p class="loading">読み込み中...</p></div>
+            <h3>レース集計結果 (updated_summary)</h3>
+            <div id="updated-summary-table" class="table-wrapper"><p class="loading">読み込み中...</p></div>
         </div>
 
         <div id="detail-tab" class="tab-content">
@@ -67,11 +63,9 @@
         const cacheBuster = `?t=${new Date().getTime()}`;
         
         const csvFiles = {
-            'summary-table3': 'keirin_race_summary4.csv' + cacheBuster,
-            'summary-table2': 'keirin_race_summary3.csv' + cacheBuster,
-            'summary-table':  'keirin_race_summary2.csv' + cacheBuster,
-            'detail-table':   'keirin_prediction_result_combined.csv' + cacheBuster,
-            'prediction-table': 'keirin_race_summary.csv' + cacheBuster
+            'updated-summary-table': 'updated_keirin_race_summary.csv' + cacheBuster,
+            'detail-table':          'keirin_prediction_result_combined.csv' + cacheBuster,
+            'prediction-table':      'keirin_race_summary.csv' + cacheBuster
         };
 
         document.getElementById('last-updated').textContent = new Date().toLocaleString('ja-JP');
