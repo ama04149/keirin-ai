@@ -4,4 +4,6 @@ catboost_info/
 backup/
 *.pkl
 *.xlsx
-logs.log
+logs.log"race_card3_202106-202606.csv" 
+"data/merged/ev_tickets_all.csv" 
+"race_card3_202106-202606.csv" 

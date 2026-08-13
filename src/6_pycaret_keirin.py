@@ -27,31 +27,33 @@ print(f"データ結合後のShape: {df.shape}")
 
 # --- 2. データの前処理と特徴量生成 ---
 
-# 【修正箇所①】列名のクリーニングを最初に行う
-# df.columns = df.columns.str.strip()
-# df.columns = df.columns.str.replace(' ', '_').str.replace('　', '_')
-df.columns = df.columns.str.strip().str.replace(' ', '_').str.replace('　', '_')
+# 【重要】「開始時間」から「時(Hour)」を抽出して新しい列「発走時」を作成 (例: "15:40" -> 15)
+df['発走時'] = df['開始時間'].apply(lambda x: int(str(x).split(':')[0]) if pd.notna(x) and ':' in str(x) else 0)
+
+# 列名のクリーニングを最初に行う
+df.columns = df.columns.str.strip().str.replace(' ', '_').str.replace(' ', '_')
 
 # カテゴリとして扱う列を先に定義
-categorical_features = ['枠_番', '車_番', '級_班', '脚_質', '期別', '競輪場', 'グレード', '天気', 'レース番号','レースタイトル', '開催番号', '強度', '強度２', '強度３', 'ライン構成', '1周'] # '予_想', 
+categorical_features = ['枠_番', '車_番', '級_班', '脚_質', '期別', '競輪場', 'グレード', '天気', 'レース番号','レースタイトル', '開催番号', '強度', '強度２', '強度３', 'ライン構成', '1周']
 
-# カテゴリ変数と、手動で処理/削除する列を定義
+# カテゴリ変数と、手動で処理/削除する列を定義（※ここに「発走時」は入れない）
 exclude_from_numeric_conversion = categorical_features + ['index', '総_評', 'レース名', '開催日', '開始時間', '予_想', '選手名']
 
-# 【修正箇所④】除外リスト以外の全ての列を一括で数値化 ('着_順'もここで処理される)
+# 除外リスト以外の全ての列を一括で数値化 ('発走時'もここで自動的に数値として処理されます)
 for col in df.columns:
     if col not in exclude_from_numeric_conversion:
         df[col] = pd.to_numeric(df[col], errors='coerce')
-        
-# 【修正】2. 数値変換が終わった後に、一括で欠損値を埋める（最強の処理）
+
+# 数値変換が終わった後に、一括で欠損値を埋める
 numeric_cols = df.select_dtypes(include=['number']).columns
 df[numeric_cols] = df[numeric_cols].fillna(0)
 
 object_cols = df.select_dtypes(include=['object']).columns
 df[object_cols] = df[object_cols].fillna('unknown')
 
-# 【重要】新しく追加された累積列を定義（数値変換の対象に含める）
+# 【重要】新しく追加された累積列 ＋「発走時」を数値特徴量として定義
 cumulative_features = ['累計勝率', '累計2連対率', '累計3連対率', '累計出走数']
+numeric_features_for_pycaret = cumulative_features + ['発走時'] # ←これをsetupに渡す
 
 # 【修正】3. 目的変数(target)の作成
 # 3着以内を 1、それ以外を 0 とする（反転させないのが一般的です）
@@ -89,8 +91,9 @@ s = setup(data=data_train,
         session_id=123,
         n_jobs=4,
         categorical_features=categorical_features,
-        ignore_features=['開始時間'], # 時間データは今回は無視
-        fix_imbalance=True, # 1着予測は不均衡データなのでTrueを推奨
+        numeric_features=numeric_features_for_pycaret, # 💡「発走時」が含まれたリストを指定
+        ignore_features=['開始時間'], # 元の文字列の「15:40」は使わないので除外のままでOK
+        fix_imbalance=True, 
         feature_selection=True,
         verbose=False)
 '''

@@ -1,0 +1,30 @@
+<h2>購入確認</h2>
+
+<form action="/buy" method="post">
+
+<table border="1">
+
+<tr>
+<th>競輪場</th>
+<th>レース</th>
+<th>BOX</th>
+</tr>
+
+{% for r in races %}
+<tr>
+<td>{{r.venue}}</td>
+<td>{{r.race}}</td>
+<td>{{r.box}}</td>
+</tr>
+
+<input type="hidden" name="race" value="{{loop.index0}}">
+
+{% endfor %}
+
+</table>
+
+<br>
+
+<input type="submit" value="購入実行">
+
+</form>

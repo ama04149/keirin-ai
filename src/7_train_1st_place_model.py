@@ -16,7 +16,7 @@ sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 # --- 1. データの読み込みと結合 ---
 # df_shussou = pd.read_pickle('race_card3_202106-202512.pkl')
 df_shussou = pd.read_pickle('race_card3_cumulative_ready.pkl')
-df_raceinfo = pd.read_pickle('race_info2_202106-202601.pkl')
+df_raceinfo = pd.read_pickle('race_info2_202106-202606.pkl')
 
 df_shussou.reset_index(inplace=True)
 df_raceinfo.reset_index(inplace=True)
@@ -27,30 +27,33 @@ print(f"データ結合後のShape: {df.shape}")
 
 # --- 2. データの前処理と特徴量生成 ---
 
-# 【修正箇所①】列名のクリーニングを最初に行う
-df.columns = df.columns.str.strip().str.replace(' ', '_').str.replace('　', '_')
+# 【重要】「開始時間」から「時(Hour)」を抽出して新しい列「発走時」を作成 (例: "15:40" -> 15)
+df['発走時'] = df['開始時間'].apply(lambda x: int(str(x).split(':')[0]) if pd.notna(x) and ':' in str(x) else 0)
+
+# 列名のクリーニングを最初に行う
+df.columns = df.columns.str.strip().str.replace(' ', '_').str.replace(' ', '_')
 
 # カテゴリとして扱う列を先に定義
-categorical_features = ['枠_番', '車_番', '級_班', '脚_質', '期別', '競輪場', 'グレード', '天気', 'レース番号','レースタイトル', '開催番号', '強度', '強度２', '強度３', 'ライン構成', '1周'] #'予_想', 
+categorical_features = ['枠_番', '車_番', '級_班', '脚_質', '期別', '競輪場', 'グレード', '天気', 'レース番号','レースタイトル', '開催番号', '強度', '強度２', '強度３', 'ライン構成', '1周']
 
-# カテゴリ変数と、手動で処理/削除する列を定義
-exclude_from_numeric_conversion = categorical_features + ['index', '総_評', 'レース名', '開催日', '開始時間', '予_想', '選手名']# 'レースタイトル',
+# カテゴリ変数と、手動で処理/削除する列を定義（※ここに「発走時」は入れない）
+exclude_from_numeric_conversion = categorical_features + ['index', '総_評', 'レース名', '開催日', '開始時間', '予_想', '選手名']
 
-# 【修正箇所④】除外リスト以外の全ての列を一括で数値化 ('着_順'もここで処理される)
+# 除外リスト以外の全ての列を一括で数値化 ('発走時'もここで自動的に数値として処理されます)
 for col in df.columns:
     if col not in exclude_from_numeric_conversion:
         df[col] = pd.to_numeric(df[col], errors='coerce')
 
-# 【修正】2. 数値変換が終わった後に、一括で欠損値を埋める（最強の処理）
+# 数値変換が終わった後に、一括で欠損値を埋める
 numeric_cols = df.select_dtypes(include=['number']).columns
 df[numeric_cols] = df[numeric_cols].fillna(0)
 
 object_cols = df.select_dtypes(include=['object']).columns
 df[object_cols] = df[object_cols].fillna('unknown')
 
-
-# 【重要】新しく追加された累積列を定義（数値変換の対象に含める）
+# 【重要】新しく追加された累積列 ＋「発走時」を数値特徴量として定義
 cumulative_features = ['累計勝率', '累計2連対率', '累計3連対率', '累計出走数']
+numeric_features_for_pycaret = cumulative_features + ['発走時'] # ←これをsetupに渡す
 
 # 【修正箇所③】目的変数(target)の作成
 df['着_順'] = pd.to_numeric(df['着_順'], errors='coerce').fillna(99)
@@ -92,11 +95,83 @@ s = setup(data=data_train,
         session_id=123,
         n_jobs=4,
         categorical_features=categorical_features,
-        numeric_features=cumulative_features,
-        ignore_features=['開始時間'], # 時間データは今回は無視
-        fix_imbalance=True, # 1着予測は不均衡データなのでTrueを推奨
+        numeric_features=numeric_features_for_pycaret, # 💡「発走時」が含まれたリストを指定
+        ignore_features=['開始時間'], # 元の文字列の「15:40」は使わないので除外のままでOK
+        fix_imbalance=True, 
         feature_selection=True,
         verbose=False)
+
+# --- 4. モデルの学習と評価 ---
+# compare_models で LightGBM をベースモデルとして取得
+base_model = compare_models(
+    sort='AUC',
+    verbose=False,
+    include=['lightgbm']
+)
+
+# 直前に生成された比較結果の表をDataFrameとして取得し表示
+results_grid = pull()
+print("--- モデル比較結果 ---")
+print(results_grid)
+
+# --- 単調性制約（Monotone Constraints）の構築 ---
+# PyCaretが内部で生成した最終的な特徴量のリストを取得
+feature_names = s.X_train.columns.tolist()
+
+# 各特徴量に対する制約リストを動的に作成 (デフォルトは 0: 制約なし)
+constraints_list = []
+for col in feature_names:
+    if '競走得点' in col:
+        constraints_list.append(1)   # 得点が高いほど確率が上がる
+    elif '年齢' in col:
+        constraints_list.append(-1)  # 年齢が高いほど確率が下がる
+    elif 'ライン数' in col:
+        constraints_list.append(-1)  # ライン数が多いほど確率が下がる
+    else:
+        constraints_list.append(0)   # その他は制約なし
+
+# LightGBM用のパラメータ辞書を用意
+lgb_params = {'monotone_constraints': constraints_list}
+
+print(f"単調性制約を設定しました（総特徴量数: {len(constraints_list)}）")
+
+# --- チューニングと最終化 ---
+# create_model を挟まず、取得したモデルを直接 tune_model に渡して制約パラメータを注入します
+print("モデルのハイパーパラメータチューニングと制約の適用を実行中...")
+tuned_model = tune_model(
+    base_model, 
+    n_iter=25, 
+    custom_grid=lgb_params, # ここで単調性制約を確実にモデルへ注入します
+    verbose=False
+)
+
+# チューニング済みモデルを最終化（全学習データで再学習）
+final_model = finalize_model(tuned_model)
+
+# 保存するモデル名を指定して保存
+save_model(final_model, 'keirin_model_1st_place')
+print(f"\n1着予測モデルが 'keirin_model_1st_place.pkl' として保存されました。")
+
+
+# --- 5. 評価と診断 ---
+# 正しい列の順序を保存
+correct_columns = data_train.drop('target', axis=1).columns.tolist()
+pd.to_pickle(correct_columns, 'model_columns_1st.pkl')
+print("1着予測モデルの列順序を 'model_columns_1st.pkl' に保存しました。")
+
+# 混同行列の計算
+holdout_predictions = predict_model(tuned_model)
+cm = confusion_matrix(holdout_predictions['target'], holdout_predictions['prediction_label'])
+print("\n混同行列 (Numpy配列):\n", cm)
+
+# モデルの基本性能診断
+train_preds = predict_model(final_model, data=data_train)
+# スコアが逆転している可能性があるため、1から引いて補正
+train_preds['prediction_score'] = 1 - train_preds['prediction_score'] 
+correlation = train_preds[['競走得点', 'prediction_score']].corr()
+print("\n「競走得点」と「補正後予測スコア」の相関行列:\n", correlation)
+
+
 '''
 # --- 4. モデルの学習と評価 2025/11/27修正---
 best_model = compare_models(
@@ -104,13 +179,12 @@ best_model = compare_models(
     verbose=False,
     #include=['lr', 'dt', 'rf', 'xgboost', 'catboost', 'lightgbm', 'knn', 'svm', 'gbc', 'et', 'ada'])
     include=['lightgbm'])
-'''
+
 top3_models = compare_models(
     sort='AUC',
     verbose=False,
     n_select=3,   # 上位3つのモデルを選択
     include=['lightgbm', 'xgboost', 'catboost'])
-
 
 # 直前に生成された比較結果の表をDataFrameとして取得
 results_grid = pull()
@@ -119,29 +193,29 @@ results_grid = pull()
 print("--- モデル比較結果 ---")
 print(results_grid)
 
-# monotone_constraints={'予_想': 0, '競走得点': 1, '年齢': -1, 'ライン数': -1}
+monotone_constraints={'予_想': 0, '競走得点': 1, '年齢': -1, 'ライン数': -1}
 # create_model を使って、制約付きのモデルを作成
-# best_model = create_model(best_model, monotone_constraints=monotone_constraints)
+best_model = create_model(best_model, monotone_constraints=monotone_constraints)
 
 # --- スタッキングモデルの構築 2025/11/27追加---
-stacked_model = stack_models(
-    estimator_list=top3_models, 
-    meta_model=create_model('lr')  # メタモデルはロジスティック回帰でOK
-)
+#stacked_model = stack_models(
+#    estimator_list=top3_models, 
+#    meta_model=create_model('lr')  # メタモデルはロジスティック回帰でOK
+#)
 
 # 最適モデルのハイパーパラメータをチューニング
 #tuned_model = tune_model(best_model) 2025/11/27修正
 
 # --- スタッキングモデルをチューニング 2025/11/27追加---
-tuned_model = tune_model(stacked_model)
+#tuned_model = tune_model(stacked_model)
 # --- 最終モデルを生成 ---
-final_model = finalize_model(tuned_model)
+#final_model = finalize_model(tuned_model)
 
 
-#tuned_model = tune_model(best_model, n_iter=50)
+tuned_model = tune_model(best_model, n_iter=50)
 #tuned_model = blend_models(estimator_list=best_model)
 # チューニング済みモデルを最終化（全学習データで再学習）
-#final_model = finalize_model(tuned_model)
+final_model = finalize_model(tuned_model)
 
 # 【変更点④】保存するモデル名を変更
 save_model(final_model, 'keirin_model_1st_place') # ← 新しい名前を指定
@@ -175,3 +249,4 @@ print("\n「競走得点」と「補正後予測スコア」の相関行列:\n",
 #plot_model(final_model, plot='threshold')
 
 #print(train_preds.groupby('target')['prediction_score'].describe())
+'''

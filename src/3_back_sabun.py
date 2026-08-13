@@ -70,11 +70,11 @@ def bankcho(r_info):
 
 # main関数
 if __name__ == '__main__':
-    r_syu= pd.read_pickle('race_card_202601-202601.pkl')
+    r_syu= pd.read_pickle('race_card_202604-202606.pkl')
     r_syu_s = back_sabun(r_syu)
 
-    r_inf = pd.read_pickle('race_info_202601-202601.pkl')
+    r_inf = pd.read_pickle('race_info_202604-202606.pkl')
     r_inf_b = bankcho(r_inf)
 
-    pd.to_pickle(r_syu_s,'race_card2_202601-202601.pkl')
-    pd.to_pickle(r_inf_b,'race_info2_202601-202601.pkl')
+    pd.to_pickle(r_syu_s,'race_card2_202604-202606.pkl')
+    pd.to_pickle(r_inf_b,'race_info2_202604-202606.pkl')

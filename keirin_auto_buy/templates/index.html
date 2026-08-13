@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>競輪 自動購入候補</title>
+</head>
+<body>
+
+<h2>競輪 自動購入候補</h2>
+
+<form method="get" action="/">
+<label>
+<input type="checkbox" name="a_filter" value="1" {% if a_filter %}checked{% endif %}>
+A率が0.8未満のみ表示
+</label>
+<button type="submit">フィルタ</button>
+</form>
+
+<br>
+
+<form method="POST" action="/confirm">
+
+<table border="1">
+
+<tr>
+<th>選択</th>
+<th>競輪場</th>
+<th>レース番号</th>
+<th>開始時刻</th>
+<th>1着</th>
+<th>補欠</th>
+<th>A率</th>
+<th>選手数</th>
+</tr>
+
+{% for race in races %}
+<tr>
+
+<td>
+<input type="checkbox" name="selected" value="{{ loop.index0 }}">
+</td>
+
+<td>{{ race[0] }}</td>
+<td>{{ race[1] }}</td>
+<td>{{ race[2] }}</td>
+<td>{{ race[6] }}</td>
+<td>{{ race[7] }}</td>
+<td>{{ race[10] }}</td>
+<td>{{ race[16] }}</td>
+
+</tr>
+{% endfor %}
+
+</table>
+
+<br>
+<button type="submit">確認画面へ</button>
+
+</form>
+
+</body>
+</html>

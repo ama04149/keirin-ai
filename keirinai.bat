@@ -14,10 +14,12 @@ python "C:\Users\wolfs\Desktop\keirin-ai\src\t_race.py"
 echo "keirin_prediction_result.csv を処理するスクリプトを実行します..."
 python "C:\Users\wolfs\Desktop\keirin-ai\src\analyze_prediction.py"
 
-echo "EVランキングを作成します..."
-python "C:\Users\wolfs\Desktop\keirin-ai\src\ev_ranker.py"
+REM echo "EVランキングを作成します..."
+REM python "C:\Users\wolfs\Desktop\keirin-ai\src\ev_ranker.py"
+
+REM echo "EVランキング（２車複）を作成します..."
+REM python "C:\Users\wolfs\Desktop\keirin-ai\src\ev_ranker_2shahuku.py"
 
 echo "すべての処理が完了しました。"
 
-REM pause
-REM pause
+pause

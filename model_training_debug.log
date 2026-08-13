@@ -1,0 +1,130 @@
+データを読み込んでいます...
+全データ結合後のShape: (909494, 61)
+
+--- 【調査ログ】レース種別ごとのデータ件数 ---
+race_class
+a_class      376976
+s_class      261382
+challenge    197188
+girls         73948
+Name: count, dtype: int64
+
+==================================================
+ ロジック開始: GIRLS モデルの学習
+==================================================
+[girls] 抽出されたデータ件数: 73948件 (うち target=1 は 32975件)
+  File "C:\Users\wolfs\Desktop\keirin-ai\.venv\Lib\site-packages\joblib\externals\loky\backend\context.py", line 257, in _count_physical_cores
+    cpu_info = subprocess.run(
+               ^^^^^^^^^^^^^^^
+  File "C:\Users\wolfs\AppData\Local\Programs\Python\Python311\Lib\subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\wolfs\AppData\Local\Programs\Python\Python311\Lib\subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "C:\Users\wolfs\AppData\Local\Programs\Python\Python311\Lib\subprocess.py", line 1538, in _execute_child
+    hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[LightGBM] [Info] Number of positive: 25805, number of negative: 25805
+[LightGBM] [Info] Auto-choosing col-wise multi-threading, the overhead of testing was 0.020204 seconds.
+You can set `force_col_wise=true` to remove the overhead.
+[LightGBM] [Info] Total Bins 13358
+[LightGBM] [Info] Number of data points in the train set: 51610, number of used features: 104
+[LightGBM] [Info] [binary:BoostFromScore]: pavg=0.500000 -> initscore=0.000000
+[girls] 【重要】モデル学習に使用される特徴量の数: 54個
+  -> 発走時（時間帯）列は正常に維持され、学習に組み込まれました。
+  -> 累計勝率 列は正常に維持され、学習に組み込まれました。
+  -> 累計2連対率 列は正常に維持され、学習に組み込まれました。
+  -> 累計3連対率 列は正常に維持され、学習に組み込まれました。
+  -> 累計出走数 列は正常に維持され、学習に組み込まれました。
+  -> 競走得点列は正常に維持されています。
+Transformation Pipeline and Model Successfully Saved
+[girls] 【検証】テストデータに対する予測確率の分布:
+  -> MAX（最高確率）: 0.9920
+  -> MIN（最低確率）: 0.5000
+  -> AVG（平均確率）: 0.7603
+[girls] 混同行列:
+ [[8641 2419]
+ [2503 6403]]
+
+==================================================
+ ロジック開始: CHALLENGE モデルの学習
+==================================================
+[challenge] 抽出されたデータ件数: 197188件 (うち target=1 は 90382件)
+[LightGBM] [Info] Number of positive: 67315, number of negative: 67315
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.013967 seconds.
+You can set `force_row_wise=true` to remove the overhead.
+And if memory is not enough, you can set `force_col_wise=true`.
+[LightGBM] [Info] Total Bins 15173
+[LightGBM] [Info] Number of data points in the train set: 134630, number of used features: 106
+[LightGBM] [Info] [binary:BoostFromScore]: pavg=0.500000 -> initscore=0.000000
+[challenge] 【重要】モデル学習に使用される特徴量の数: 54個
+  -> 発走時（時間帯）列は正常に維持され、学習に組み込まれました。
+  -> 累計勝率 列は正常に維持され、学習に組み込まれました。
+  -> 累計2連対率 列は正常に維持され、学習に組み込まれました。
+  -> 累計3連対率 列は正常に維持され、学習に組み込まれました。
+  -> 累計出走数 列は正常に維持され、学習に組み込まれました。
+  -> 競走得点列は正常に維持されています。
+Transformation Pipeline and Model Successfully Saved
+[challenge] 【検証】テストデータに対する予測確率の分布:
+  -> MAX（最高確率）: 0.9850
+  -> MIN（最低確率）: 0.5000
+  -> AVG（平均確率）: 0.6948
+[challenge] 混同行列:
+ [[21663  7187]
+ [ 8821 15570]]
+
+==================================================
+ ロジック開始: A_CLASS モデルの学習
+==================================================
+[a_class] 抽出されたデータ件数: 376976件 (うち target=1 は 168792件)
+[LightGBM] [Info] Number of positive: 131160, number of negative: 131160
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.021342 seconds.
+You can set `force_row_wise=true` to remove the overhead.
+And if memory is not enough, you can set `force_col_wise=true`.
+[LightGBM] [Info] Total Bins 15990
+[LightGBM] [Info] Number of data points in the train set: 262320, number of used features: 99
+[LightGBM] [Info] [binary:BoostFromScore]: pavg=0.500000 -> initscore=0.000000
+[a_class] 【重要】モデル学習に使用される特徴量の数: 54個
+  -> 発走時（時間帯）列は正常に維持され、学習に組み込まれました。
+  -> 累計勝率 列は正常に維持され、学習に組み込まれました。
+  -> 累計2連対率 列は正常に維持され、学習に組み込まれました。
+  -> 累計3連対率 列は正常に維持され、学習に組み込まれました。
+  -> 累計出走数 列は正常に維持され、学習に組み込まれました。
+  -> 競走得点列は正常に維持されています。
+Transformation Pipeline and Model Successfully Saved
+[a_class] 【検証】テストデータに対する予測確率の分布:
+  -> MAX（最高確率）: 0.9704
+  -> MIN（最低確率）: 0.5000
+  -> AVG（平均確率）: 0.6863
+[a_class] 混同行列:
+ [[41751 14461]
+ [17566 28006]]
+
+==================================================
+ ロジック開始: S_CLASS モデルの学習
+==================================================
+[s_class] 抽出されたデータ件数: 261382件 (うち target=1 は 109401件)
+[LightGBM] [Info] Number of positive: 95730, number of negative: 95730
+[LightGBM] [Info] Auto-choosing row-wise multi-threading, the overhead of testing was 0.016619 seconds.
+You can set `force_row_wise=true` to remove the overhead.
+And if memory is not enough, you can set `force_col_wise=true`.
+[LightGBM] [Info] Total Bins 17280
+[LightGBM] [Info] Number of data points in the train set: 191460, number of used features: 103
+[LightGBM] [Info] [binary:BoostFromScore]: pavg=0.500000 -> initscore=0.000000
+[s_class] 【重要】モデル学習に使用される特徴量の数: 54個
+  -> 発走時（時間帯）列は正常に維持され、学習に組み込まれました。
+  -> 累計勝率 列は正常に維持され、学習に組み込まれました。
+  -> 累計2連対率 列は正常に維持され、学習に組み込まれました。
+  -> 累計3連対率 列は正常に維持され、学習に組み込まれました。
+  -> 累計出走数 列は正常に維持され、学習に組み込まれました。
+  -> 競走得点列は正常に維持されています。
+Transformation Pipeline and Model Successfully Saved
+[s_class] 【検証】テストデータに対する予測確率の分布:
+  -> MAX（最高確率）: 0.9603
+  -> MIN（最低確率）: 0.5000
+  -> AVG（平均確率）: 0.6787
+[s_class] 混同行列:
+ [[31756  9272]
+ [13159 16387]]
+
+ 全てのレース種別のモデル構築・調査ロギングが完了しました！

@@ -257,8 +257,8 @@ def race_data_scrape(race_ids):
 # main関数
 if __name__ == '__main__':
     #race_ids = pd.read_pickle('race_id_202106-202206.pkl')
-    race_ids = pd.read_pickle('race_id_202601-202601.pkl')
+    race_ids = pd.read_pickle('race_id_202604-202606.pkl')
     race_data = race_data_scrape(race_ids)
-    pd.to_pickle(race_data[0],'race_info_202601-202601.pkl')
-    pd.to_pickle(race_data[1],'race_card_202601-202601.pkl')
-    pd.to_pickle(race_data[2].iloc[:,:11],'race_return_202601-202601.pkl')
+    pd.to_pickle(race_data[0],'race_info_202604-202606.pkl')
+    pd.to_pickle(race_data[1],'race_card_202604-202606.pkl')
+    pd.to_pickle(race_data[2].iloc[:,:11],'race_return_202604-202606.pkl')

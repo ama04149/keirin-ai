@@ -1,0 +1,2 @@
+﻿bets,settled,unsettled,hit_exact,hit_exact_rate,hit_set,hit_set_rate,stake_realized,stake_pending,payout_realized,profit_realized,best_p_mean,best_odds_mean,mult_ev_mean
+20,19,1,0,0.0,0,0.0,2400.0,200.0,0.0,-2400.0,0.005836597790519835,6973.610000000001,36.04347967134712
